@@ -11,6 +11,9 @@ states the version pushed.
 
 TODO: push to a public repo
 
+For now, you have to clone the project, then run `sbt publish-local` to install the dependency
+to your local ivy repository where it can get picked up.
+
 # Usage
 
 ```scala
