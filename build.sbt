@@ -2,6 +2,6 @@ sbtPlugin := true
 
 name := "sbt-slack-notify"
 
-version := "0.0.0-SNAPSHOT"
+version := "0.2.0"
 
 organization := "ly.jamie"

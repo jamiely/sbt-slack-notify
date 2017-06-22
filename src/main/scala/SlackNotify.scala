@@ -4,6 +4,7 @@ import java.io.DataOutputStream
 import java.net.HttpURLConnection
 
 import sbt._
+import sbt.Keys.sLog
 
 import scala.util.Try
 
@@ -14,15 +15,27 @@ object SlackNotifyPlugin extends AutoPlugin {
     val slackMessage = settingKey[String]("The message to send")
     val slackHookUrl = settingKey[String]("The hook url")
 
-    lazy val baseSlackNotifySettings: Seq[Def.Setting[_]] = Seq(
+    lazy val baseSlackNotifySettings: Seq[Setting[_]] = Def.settings(
+      slackRoom := "",
+      slackMessage := "",
+      slackHookUrl := "",
       slackNotify := {
-        val config = Config(
-          (slackHookUrl in slackNotify).value,
-          Option((slackRoom in slackNotify).value).filter(_ != ""))
-        val result = SlackNotify(
-          config
-        ).sendMessage((slackMessage in slackNotify).value)
-        println(result)
+        val log = sLog.value
+        if(slackRoom.value.isEmpty) {
+          log.error(s"You must specify the slackRoom key")
+        } else if(slackMessage.value.isEmpty) {
+          log.error(s"You must specify the slackMessage key")
+        } else if(slackHookUrl.value.isEmpty) {
+          log.error(s"You must specify the slackHookUrl key")
+        } else {
+          val config = Config(
+            (slackHookUrl in slackNotify).value,
+            Option((slackRoom in slackNotify).value).filter(_ != ""))
+          val result = SlackNotify(
+            config
+          ).sendMessage((slackMessage in slackNotify).value)
+          log.info(s"Slack response: $result")
+        }
       }
     )
   }
@@ -30,13 +43,11 @@ object SlackNotifyPlugin extends AutoPlugin {
   import autoImport._
   override def requires = sbt.plugins.JvmPlugin
 
-  // This plugin is automatically enabled for projects which are JvmPlugin.
+  // this plugin must be specifically enabled
   override def trigger = allRequirements
 
   // a group of settings that are automatically added to projects.
-  override val projectSettings =
-    inConfig(Compile)(baseSlackNotifySettings) ++
-    inConfig(Test)(baseSlackNotifySettings)
+  override val projectSettings = baseSlackNotifySettings
 }
 
 case class Config(
