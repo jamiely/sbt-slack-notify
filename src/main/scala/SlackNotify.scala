@@ -10,7 +10,7 @@ import scala.util.Try
 
 object SlackNotifyPlugin extends AutoPlugin {
   object autoImport {
-    val slackNotify = taskKey[Unit]("Sends a message to slack")
+    val slackNotify = taskKey[Option[(Int, String)]]("Sends a message to slack")
     val slackRoom = settingKey[String]("The room to send the message to")
     val slackMessage = settingKey[String]("The message to send")
     val slackHookUrl = settingKey[String]("The hook url")
@@ -23,10 +23,13 @@ object SlackNotifyPlugin extends AutoPlugin {
         val log = sLog.value
         if(slackRoom.value.isEmpty) {
           log.error(s"You must specify the slackRoom key")
+          None
         } else if(slackMessage.value.isEmpty) {
           log.error(s"You must specify the slackMessage key")
+          None
         } else if(slackHookUrl.value.isEmpty) {
           log.error(s"You must specify the slackHookUrl key")
+          None
         } else {
           val config = Config(
             (slackHookUrl in slackNotify).value,
@@ -35,6 +38,7 @@ object SlackNotifyPlugin extends AutoPlugin {
             config
           ).sendMessage((slackMessage in slackNotify).value)
           log.info(s"Slack response: $result")
+          Option(result)
         }
       }
     )
