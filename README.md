@@ -14,6 +14,18 @@ to your local ivy repository where it can get picked up.
 
 # Usage
 
+Add the plugin to your `project/plugins.sbt` file:
+
+```
+addSbtPlugin("ly.jamie" % "sbt-slack-notify" % "0.3.1")
+
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("releases")
+  )
+```
+
+Then add these settings to your `build.sbt` file:
+
 ```scala
 lazy val root = (project in file(".")).
   settings(
